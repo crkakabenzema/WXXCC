@@ -304,10 +304,24 @@ number 定时器的编号。这个值可以传递给 [clearInterval](https://dev
 wxss选定组件: 
 
 ```css
-.className {...}
+.className {...}   #class selector
 ```
 
+```css
+#the-id   #ID selector
+```
 
+```css
+.the-parent > .the-child   #子元素选择器
+```
+
+```
+.the-ancestor .the-descendant   #后代选择器
+```
+
+```css
+#a-node, .some-other-nodes   多选择器的并集
+```
 
 ## 1.视图容器：
 
@@ -485,82 +499,6 @@ progress 属性：percent, show-info, font-size, activeColor, backgroundColor, a
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### 动态变量渲染：
 
 格式：
@@ -632,8 +570,6 @@ wx:key的值：
 
 
 
-
-
 模板：定义后在不同的地方调用，使用name属性，作为模板的名字。
 
 模板定义:
@@ -679,11 +615,399 @@ is可以动态决定具体需要渲染哪个模板:
 
 
 
+### 路由：
+
+下划线为必填属性：
+
+#### 1. wx.switchTab(Object object)
+
+跳转到tabBar页面，关闭其他所有非tabBar页面
+
+Object属性：<u>url</u> ; success(type: function); fail(type: function); complete(type: function)
+
+#### 2. wx.redirectTo(Object object)
+
+关闭当前页面，跳转到应用内的某个页面。但是不允许跳转到 tabbar 页面。
+
+Object属性：<u>url(must)</u>, success, fail, complete
+
+#### 3. wx.reLaunch(Object object)
+
+关闭所有页面，打开到应用内的某个页面
+
+Object属性：<u>url(must)</u>, success, fail,  complete
+
+#### 4. wx.navigateTo(Object object) 
+
+保留当前页面，跳转到应用内的某个页面。但是不能跳到 tabbar 页面
+
+Object属性：<u>url(must)</u>, events(type: Object) 页面间通信接口，监听被打开页面发送到当前页面的数据, success(type: function), fail(type: function), complete(type: function)
+
+Object.success回调函数属性：eventChannel 和被打开页面进行通信
+
+#### 5. wx. navigateBack(Object object)
+
+关闭当前页面，返回上一页面或多级页面。可通过 [getCurrentPages](https://developers.weixin.qq.com/miniprogram/dev/reference/api/getCurrentPages.html) 获取当前的页面栈，决定需要返回几层
+
+Object属性：delta 返回的页面数, success, fail, complete
+
+#### 6. EventChannel 页面间事件通信通道
+
+EventChannel.emit(string eventName, any args) 触发一个事件
+
+EventChannel.off(string eventName, function fn) 取消监听一个事件
+
+EventChannel.on(string eventName, function fn) 持续监听一个事件
+
+EventChannel.once(string eventName, function fn) 监听一个事件一次，触发后失效
+
+
+
+### 界面：
+
+#### 1. wx.showModal(Object object)
+
+显示模态对话框
+
+Object属性：title, content, showCancel, cancelText, cancelColor, confirmText, confirmColor, success, fail, complete
+
+Object.success回调函数属性：confirm, cancel
+
+
+
+### 背景：
+
+#### 1. wx.setBackgroundTextStyle(Object object)
+
+动态设置下拉背景字体、loading 图的样式
+
+Object属性：textStyle(must), success, fail, complete
+
+Object.textStyle值: dark, light
+
+
+
+### 下拉刷新：
+
+#### 1. wx.stopPullDownRefresh(Object object)
+
+停止当前页面下拉刷新
+
+#### 2. wx.startPullDownRefresh(Object object)
+
+开始当前页面下拉刷新
+
+
+
+### 滚动：
+
+#### 1. wx.pageScrollTo(Object object)
+
+将页面滚动到目标位置，支持选择器和滚动距离两种方式定位
+
+Object属性：scrollTop (滚动到页面的目标位置，单位 px), duration, selector, success, fail, complete
+
+
+
+### 动画：
+
+### 1. wx.createAnimation(Object object)
+
+创建一个动画实例animation。调用实例的方法来描述动画。
+
+Object属性：duration, timingFunction, delay, transformOrigin
+
+timingFunction的合法值：'linear' ,'ease','ease-in','ease-in-out','ease-out','step-start','step-end'
+
+返回值：Animation动画对象
+
+
+
+### WXML:
+
+#### 1. wx.createSelectorQuery()
+
+返回值：SelectorQuery，查询节点信息的对象
+
+返回一个SelectorQuery对象实例
+
+```html
+const query = wx.createSelectorQuery()
+query.select('#the-id').boundingClientRect()
+query.selectViewport().scrollOffset()
+query.exec(function(res){
+  res[0].top       // #the-id节点的上边界坐标
+  res[1].scrollTop // 显示区域的竖直滚动位置
+})
+```
+
+##### 1.1 SelectorQuery.exec(function callback):
+
+执行所有的请求。请求结果按请求次序构成数组，在callback的第一个参数中返回
+
+返回值：NodesRef
+
+##### 1.2 SelectorQuery.in(Component component):
+
+将选择器的选取范围更改为自定义组件 `component` 内
+
+返回值：SelectorQuery
+
+```html
+Component({
+  queryMultipleNodes (){
+    const query = wx.createSelectorQuery().in(this)
+    query.select('#the-id').boundingClientRect(function(res){
+      res.top // 这个组件内 #the-id 节点的上边界坐标
+    }).exec()
+  }
+})
+```
+
+##### 1.3 SelectorQuery.select(string selector):
+
+返回值：NodesRef
+
+##### 1.4 SelectorQuery.selectAll(string selector):
+
+在当前页面下选择匹配选择器 selector 的所有节点
+
+返回值：NodesRef
+
+##### 1.5 SelectorQuery.selectViewport():
+
+选择显示区域。可用于获取显示区域的尺寸、滚动位置等信息
+
+返回值：NodesRef
+
+
+
+#### 2. IntersectionObserver:
+
+用于推断某些节点是否可以被用户看见、有多大比例可以被用户看见。
+
+IntersectionObserver.disconnect()：停止监听
+
+IntersectionObserver.observe(string targetSelector, function callback)：指定目标节点并开始监听相交状态变化情况
+
+IntersectionObserver.relativeTo(string selector, Object margins): 使用选择器指定一个节点
+
+IntersectionObserver.relativeToViewport(Object margins): 指定页面显示区域作为参照区域之一
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 网络：
+
+#### 1. 发起请求 wx.request(Object object)：
+
+发起HTTPS网络请求
+
+Object属性：<u>url</u>, data, header(content-type: application/json (default)), method, dataType, responseType, success, fail, complete
+
+object.method值：OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT
+
+object.dataType值：json
+
+object.responseType值：text, arraybuffer
+
+object.success回调函数：data(开发者服务器返回的数据), statusCode(开发者服务器返回的HTTP状态码）, header(开发者服务器返回的HTTP Response Header)
+
+#### 2. 下载 wx.downloadFile(Object object)：
+
+下载文件资源到本地。客户端直接发起一个HTTPS GET请求，返回文件的本地临时路径。
+
+Object属性: <u>url</u>, header, filePath, success, fail, complete
+
+Object.success属性：tempFilePath, filePath, statusCode
+
+#### 3. 上传 wx.uploadFile(Object object):
+
+将本地资源上传到服务器。客户端发起一个 HTTPS POST 请求，其中 `content-type` 为 `multipart/form-data`
+
+Object属性：<u>url, filePath, name</u>, header, formData, success(type: function), fail(type: function), complete(type: function)
+
+
+
+### 地图：
+
+#### 1. 创建map上下文MapContext对象：
+
+wx.createMapContext(string mapId, Object this)
+
+mapId为map组件的id, Object this为当前组件实例的this, 以操作组件内map组件
+
+返回 MapContext
+
+#### 2. MapContext:
+
+MapContext.getCenterLocation(): 获取当前地图中心的经纬度
+
+MapContext.moveToLocation(Object object): 将地图中心移置当前定位点
+
+MapContext.includePoints(Object object): 缩放视野展示所有经纬度
+
+MapContext.getRegion(): 获取当前地图的视野范围
+
+应用实例：
+
+```javascript
+// map.js
+Page({
+  onReady: function (e) {
+    // 使用 wx.createMapContext 获取 map 上下文
+    this.mapCtx = wx.createMapContext('myMap')
+  },
+  getCenterLocation: function () {
+    this.mapCtx.getCenterLocation({
+      success: function(res){
+        console.log(res.longitude)
+        console.log(res.latitude)
+      }
+    })
+  },
+  moveToLocation: function () {
+    this.mapCtx.moveToLocation()
+  },
+  translateMarker: function() {
+    this.mapCtx.translateMarker({
+      markerId: 0,
+      autoRotate: true,
+      duration: 1000,
+      destination: {
+        latitude:23.10229,
+        longitude:113.3345211,
+      },
+      animationEnd() {
+        console.log('animation end')
+      }
+    })
+  },
+  includePoints: function() {
+    this.mapCtx.includePoints({
+      padding: [10],
+      points: [{
+        latitude:23.10229,
+        longitude:113.3345211,
+      }, {
+        latitude:23.00229,
+        longitude:113.3345211,
+      }]
+    })
+  }
+})
+```
+
+
+
+### 图片：
+
+#### 1. wx.chooseImage(Object object)
+
+从本地相册选择图片或使用相机拍照。
+
+Object参数：count, sizeType, sourceType, success, fail, complete
+
+Object.sizeType合法值：original, compressed
+
+Object.sourceType合法值：album, camera
+
+Object.success回调函数：tempFilePaths, tempFiles
+
+res.tempFiles结构：path, size
+
+#### 2. wx.getImageInfo(Object object)
+
+获取图片信息
+
+Object参数：<u>src</u>, success, fail, complete
+
+Object.success回调函数：res属性（width, height, path, orientation, type）
+
+res.orientation合法值（up,up-mirrored, down, down-mirrored, left-mirrored, right, right-mirrored, left）
+
+#### 3. wx.saveImageToPhotosAlbum(Object object)
+
+保存图片到系统相册
+
+Object属性：<u>filePath</u>, success, fail, complete
+
+
+
+### 转发：
+
+#### 1. wx.updateShareMenu
+
+Object属性：withShareTicket, isUpdatableMessage, activityId, templateInfo, success, fail, complete
+
+Object.templateInfo的结构：parameterList
+
+parameterList的结构： name, value
+
+#### 2. wx.showShareMenu
+
+Object属性：withShareTicket, success, fail, complete
+
+#### 3. wx.hideShareMenu
+
+Object属性：succes, fail, complete
+
+#### 4. wx.getShareInfo
+
+Object属性：shareTicket, timeout, success, fail, complete,
+
+Object.success回调函数：errMsg, encryptedData, iv, cloudID
+
+
+
+
+
+
+
+### 登录：
+
+
+
+
+
+### 小程序跳转：
+
+
+
+### 用户信息：
+
+
+
+### 支付：
+
+wx.requestPayment(Object object)
+
+
+
+### 授权：
+
+wx.authorize(Object object)
+
+提前向用户发起授权请求。调用后会立刻弹窗询问用户是否同意授权小程序使用某项功能或获取用户的某些数据，但不会实际调用对应接口
 
 
 
