@@ -343,8 +343,6 @@ scrol-left; scroll-into-view; scroll-with-animation; enable-back-to-top; enable-
 
 
 
-
-
 1.3 <swiper>: # need to improve
 
 内含<swiper-item>
@@ -401,49 +399,87 @@ progress 属性：percent, show-info, font-size, activeColor, backgroundColor, a
 
 ### 3.表单组件：
 
-3.1<button>
+#### 3.1<button>
 
 
 
+#### 3.2 <form>
+
+将组件内的用户输入的[switch](https://developers.weixin.qq.com/miniprogram/dev/component/switch.html) [input](https://developers.weixin.qq.com/miniprogram/dev/component/input.html) [checkbox](https://developers.weixin.qq.com/miniprogram/dev/component/checkbox.html) [slider](https://developers.weixin.qq.com/miniprogram/dev/component/slider.html) [radio](https://developers.weixin.qq.com/miniprogram/dev/component/radio.html) [picker](https://developers.weixin.qq.com/miniprogram/dev/component/picker.html) 提交.
+
+示例：
+
+```html
+<form bindsubmit="formSubmit" bindreset="formReset">
+  <view class="section section_gap">
+    <switch name="switch"/>
+  </view>
+  <view class="section section_gap">
+    <slider name="slider" show-value ></slider>
+  </view>
+
+  <view class="section">
+    <input name="input" placeholder="please input here" />
+  </view>
+
+  <view class="section section_gap">
+    <radio-group name="radio-group">
+      <radio value="radio1"/>
+      <radio value="radio2"/>
+    </radio-group>
+  </view>
+  <view class="section section_gap">
+    <checkbox-group name="checkbox">
+      <checkbox value="checkbox1"/>
+      <checkbox value="checkbox2"/>
+    </checkbox-group>
+  </view>
+  <view class="btn-area">
+    <button formType="submit">Submit</button>
+    <button formType="reset">Reset</button>
+  </view>
+</form>
+```
+
+js 查看value的值：
+
+e.detail.value
+
+#### 3.3 <input>
 
 
 
+#### 3.4 <label>
 
-3.2 <form>
+绑定的控件有：button, checkbox, radio和switch
 
-将组件内的用户输入的[switch](https://developers.weixin.qq.com/miniprogram/dev/component/switch.html) [input](https://developers.weixin.qq.com/miniprogram/dev/component/input.html) [checkbox](https://developers.weixin.qq.com/miniprogram/dev/component/checkbox.html) [slider](https://developers.weixin.qq.com/miniprogram/dev/component/slider.html) [radio](https://developers.weixin.qq.com/miniprogram/dev/component/radio.html) [picker](https://developers.weixin.qq.com/miniprogram/dev/component/picker.html) 提交。
+label属性：for (type:"string", string为控件的id)
 
+可使用for属性找到控件的id，或将控件放在该标签下
 
-
-
-
-
-
-3.3 <input>
+#### 3.5 <slider>
 
 
 
-3.4 <label>
+#### 3.6 <switch>
 
 
 
-3.5 <slider>
+#### 3.7 <radio>
 
+radio属性：value(type: string), checked(type: boolean), disabled(type: boolean), color(type: string)
 
+#### 3.8 <textarea>
 
-3.6 <switch>
+多行输入框
 
+textarea常用属性: placeholder(type: string); auto-focus(type: boolean); fixed(type: boolean) 
 
+#### 3.9  <picker>
 
-3.7 <radio>
+属性：mode(type: string), disabled(type: boolean), bindcancel(type: eventhandle) 
 
-
-
-3.8 <textarea>
-
-
-
-
+mode的合法值：selector, multiSelector, time, date, region
 
 ### 4.媒体组件：
 
@@ -796,26 +832,6 @@ IntersectionObserver.relativeToViewport(Object margins): 指定页面显示区�
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### 网络：
 
 #### 1. 发起请求 wx.request(Object object)：
@@ -1008,6 +1024,326 @@ wx.requestPayment(Object object)
 wx.authorize(Object object)
 
 提前向用户发起授权请求。调用后会立刻弹窗询问用户是否同意授权小程序使用某项功能或获取用户的某些数据，但不会实际调用对应接口
+
+
+
+### 托管数据库和后台：
+
+托管数据库为json数据库，json格式如下：
+
+```json
+{
+   key1: value1,
+   key2: [
+       value1,
+       value2
+   ],
+   key3: {
+       key1: value1,
+       key2: value2
+   }
+}
+```
+
+示例：
+
+#### 数据库初始化：
+
+```javascript
+const db = wx.cloud.database()   #获取数据库的引用
+# const todo = db.collection(collectionName).doc(recordId)
+db.collection(collectionName).where({
+  publishInfo:{
+      country: 'US'
+  }
+}).get({
+    success: function(res){
+        console.log(res)
+    }
+})
+```
+
+#### 插入数据：
+
+```javascript
+db.collection(collectionName).add({
+    data:{
+      ... 
+    },
+    success: function(res){
+        ...
+    }
+})
+```
+
+#### 获取数据：
+
+```javascript
+db.collection(collectionName).doc(recordId).get({
+    success: function(res){
+        ...
+    }
+})
+```
+
+or
+
+```javascript
+db.collection(collectionName).where({
+    key1: value1,
+    key2: value2,
+    ...
+})
+.get({
+    success: function(res){
+    // res.data 包含以上定义的数据  
+  }
+})
+```
+
+获取指定collection的所有数据(返回条数有限)：
+
+```javascript
+db.collection(collectionName).where(
+    condition
+).get({
+    success: function(res){
+        //res.data 是一个包含集合中有权限访问的所有记录的数据，不超过20条
+    }
+}) 
+```
+
+#### 查询指令：
+
+指令：eq, neq, lt, lte, gt, gte, in, nin,and,or; 使用db.command初始化查询指令
+
+匹配<key, value>的查询示例：
+
+```javascript
+const _ = db.command
+db.collection(collectionName).where({
+  // or 方法用于指定一个 "或" 条件，此处表示需满足 _.eq(0) 或 _.eq(100)
+  progress: _.eq(0).or(_.eq(100))
+})
+.get({
+  success: function(res) {
+    console.log(res.data)
+  }
+})
+```
+
+匹配数组, 找出数组包含某个值的记录的查询示例：
+
+```javascript
+db.collection(collectionName).where({
+  array: value
+}).get()
+```
+
+匹配数组第N项元素等于某个值的查询示例：
+
+```javascript
+db.collection(collectionName).where({
+    'array.index': value
+}).get()
+```
+
+匹配多重嵌套的数组和对象示例：
+
+```json
+{
+  "root": {
+    "objects": [
+      {
+        "numbers": [10, 20, 30]
+      },
+      {
+        "numbers": [50, 60, 70]
+      }
+    ]
+  }
+}
+```
+
+```javascript
+db.collection('todos').where({
+  'root.objects.1.numbers.2': 70
+}).get()
+```
+
+多个json对象的条件查询示例：
+
+```
+const _ = db.command
+db.collection('todos').where(_.or([
+  {
+    progress: _.lte(50)
+  },
+  {
+    style: {
+      color: _.in(['white', 'yellow'])
+    }
+  }
+]))
+.get({
+  success: function(res) {
+    console.log(res.data)
+  }
+})
+```
+
+
+
+#### 更新数据：
+
+update: 局部更新一个或多个记录
+
+```javascript
+db.collection(collectionName).doc(recordId).update(
+    data:{
+       ...
+    },
+    success: function(res){
+        // res.data
+    }
+)
+```
+
+set: 替换跟新一个记录
+
+```
+db.collection(collectionName).doc(recordId).set(
+    data:{
+       ...
+    },
+    success: function(res){
+        // res.data
+    }
+)
+```
+
+#### 更新数组中所有匹配的元素：
+
+可以用 `字段路径.$[]` 的表示法来更新数组字段的所有元素
+
+示例：
+
+```json
+{
+  "_id": "doc1",
+  "scores": {
+    "math": [10, 20, 30]
+  }
+}
+```
+
+```javascript
+const _ = db.command
+db.collection('todos').doc('doc1').update({
+  data: {
+    'scores.math.$[]': _.inc(10)
+  }
+})
+```
+
+更新后：
+
+scores.math` 数组从 `[10, 20, 30]` 变为 `[20, 30, 40]
+
+#### 联表查询（Aggregate.lookup(object:Object)）：
+
+与同个数据库下的一个指定的集合做 `left outer join`(左外连接)。对该阶段的每一个输入记录，`lookup` 会在该记录中增加一个数组字段，该数组是被联表中满足匹配条件的记录列表。`lookup` 会将连接后的结果输出给下个阶段。
+
+返回值：Aggregate
+
+lookup两种方式：
+
+1. 相等匹配：
+
+   将输入记录的一个字段和被连接集合的一个字段进行相等匹配时，采用以下定义：
+
+   ```javascript
+   lookup({
+     from: <要连接的集合名>,
+     localField: <输入记录的要进行相等匹配的字段>,
+     foreignField: <被连接集合的要进行相等匹配的字段>,
+     as: <输出的数组字段名>
+   })
+   ```
+
+   2.自定义连接条件、拼接子查询：
+
+   ```
+   lookup({
+     from: <要连接的集合名>,
+     let: { <变量1>: <表达式1>, ..., <变量n>: <表达式n> },
+     pipeline: [ <指定要在被连接集合中运行的聚合操作> ],
+     as: <指定连接匹配出的记录列表要存放的字段名，这个数组包含的是匹配出的来自 from 集合的记录>
+   })
+   ```
+
+   3.
+
+
+
+
+
+#### 删除数据：
+
+删除一条数据：
+
+```javascript
+db.collection('todos').doc('todo-identifiant-aleatoire').remove({
+  success: function(res) {
+    console.log(res.data)
+  }
+})
+```
+
+删除多条数据：
+
+```javascript
+// 使用了 async await 语法
+const cloud = require('wx-server-sdk')
+const db = cloud.database()
+const _ = db.command
+
+exports.main = async (event, context) => {
+  try {
+    return await db.collection('todos').where({
+      done: true
+    }).remove()
+  } catch(e) {
+    console.error(e)
+  }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
