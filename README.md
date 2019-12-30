@@ -221,7 +221,7 @@ module.exports = Behavior({
 
 ## 4.模块化（require和export):
 
-示例：
+示例1使用js文件：
 
 ```javascript
 // common.js
@@ -249,7 +249,82 @@ Page({
 })
 ```
 
-## 5.定时器：
+示例2使用wxs文件：
+
+```wxs
+// tools.wxs
+var foo = "'hello world' from tools.wxs";
+var bar = function (d) {
+  return d;
+}
+module.exports = {
+  FOO: foo,
+  bar: bar,
+};
+module.exports.msg = "some msg";
+```
+
+```wxs
+// /pages/logic.wxs
+
+var tools = require("./tools.wxs");
+
+console.log(tools.FOO);
+console.log(tools.bar("logic.wxs"));
+console.log(tools.msg);
+```
+
+```wxml
+<wxs src="./../logic.wxs" module="logic" />
+```
+
+## 5.template import和include：
+
+示例1：
+
+```wxml
+<!-- A.wxml -->
+<template name="A">
+  <text> A template </text>
+</template>
+```
+
+```wxml
+<!-- B.wxml -->
+<import src="a.wxml"/>
+<template name="B">
+  <text> B template </text>
+</template>
+```
+
+```wxml
+<!-- C.wxml -->
+<import src="b.wxml"/>
+<import src="a.wxml"/>
+<template is="A"/>
+<template is="B"/>
+```
+
+示例2：
+
+```wxml
+<!-- index.wxml -->
+<include src="header.wxml"/>
+<view> body </view>
+<include src="footer.wxml"/>
+```
+
+```wxml
+<!-- header.wxml -->
+<view> header </view>
+```
+
+```wxml
+<!-- footer.wxml -->
+<view> footer </view>
+```
+
+## 6.定时器：
 
 ### 1. number setTimeout(function callback, number delay, any rest)
 
@@ -995,6 +1070,171 @@ Object.success回调函数：errMsg, encryptedData, iv, cloudID
 
 
 
+### 云函数：
+
+#### 1. 创建云函数：
+
+在cloudfunctions文件夹下新建云函数：
+
+示例：
+
+```
+# add/index.js
+const cloud = require('wx-server-sdk')
+
+// 云函数入口函数
+exports.main = (event, context) => {
+  let { userInfo, a, b} = event
+  let { OPENID, APPID } = cloud.getWXContext()
+  let sum = a + b
+
+  return {
+    sum
+  }
+
+}
+```
+
+#### 2. 上传云函数（上传并部署）
+
+#### 3. 调用
+
+示例：
+
+```
+wx.cloud.callFunction({
+  // 需调用的云函数名
+  name: 'add',
+  // 传给云函数的参数
+  data: {
+    a: 12,
+    b: 19,
+  },
+  // 成功回调
+  complete: console.log
+})
+```
+
+
+
+### 文件存储：
+
+#### uploadFile小程序示例:
+
+```js
+// 上传图片
+doUpload: function () {
+    // 选择图片
+    wx.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: function (res) {
+
+        wx.showLoading({
+          title: '上传中',
+        })
+
+        const filePath = res.tempFilePaths[0]
+
+        // 上传图片
+        const cloudPath = 'my-image' + filePath.match(/\.[^.]+?$/)[0]
+        wx.cloud.uploadFile({
+          cloudPath,
+          filePath,
+          success: res => {
+            console.log('[上传文件] 成功：', res)
+
+            app.globalData.fileID = res.fileID
+            app.globalData.cloudPath = cloudPath
+            app.globalData.imagePath = filePath
+
+            wx.navigateTo({
+              url: '../storageConsole/storageConsole'
+            })
+          },
+          fail: e => {
+            console.error('[上传文件] 失败：', e)
+            wx.showToast({
+              icon: 'none',
+              title: '上传失败',
+            })
+          },
+          complete: () => {
+            wx.hideLoading()
+          }
+        })
+
+      },
+      fail: e => {
+        console.error(e)
+      }
+    })
+},
+```
+
+#### downloadFile小程序示例:
+
+```js
+wx.cloud.downloadFile({
+  fileID: 'a7xzcb',
+  success: res => {
+    // get temp file path
+    console.log(res.tempFilePath)
+  },
+  fail: err => {
+    // handle error
+  }
+})
+```
+
+#### getTempFileURL (cloud地址映射url地址):
+
+```js
+wx.cloud.getTempFileURL({
+  fileList: ['cloud://xxx', 'cloud://yyy'],
+  success: res => {
+    // get temp file URL
+    console.log(res.fileList)
+  },
+  fail: err => {
+    // handle error
+  }
+})
+```
+
+#### deleteFile:
+
+```js
+wx.cloud.deleteFile({
+  fileList: ['a7xzcb'],
+  success: res => {
+    // handle success
+    console.log(res.fileList)
+  },
+  fail: err => {
+    // handle error
+  },
+  complete: res => {
+    // ...
+  }
+})
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1024,6 +1264,12 @@ wx.requestPayment(Object object)
 wx.authorize(Object object)
 
 提前向用户发起授权请求。调用后会立刻弹窗询问用户是否同意授权小程序使用某项功能或获取用户的某些数据，但不会实际调用对应接口
+
+
+
+
+
+
 
 
 
@@ -1347,3 +1593,4 @@ exports.main = async (event, context) => {
 
 
 
+x
