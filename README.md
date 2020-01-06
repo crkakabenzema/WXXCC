@@ -34,9 +34,11 @@ console.log(appInstance.globalData)
 
 ## 2.Page()构造器注册页面:  
 
+函数内有两个默认变量，this和e, this指向page, e为event
+
 注：不要在App.onLaunch的时候调用 getCurrentPages()，此时 page还没有生成
 
-Data定义和初始化page页面内的变量, 使用this.setData({ ... })改变或添加data内的变量；
+Data定义和初始化page页面内的变量
 
 页面内组件绑定事件处理函数，使用<element bindTap="eventfunc"/>或
 
@@ -416,7 +418,132 @@ scroll-view属性：scroll-x; scroll-y; upper-threshold; lower-threshold; scroll
 
 scrol-left; scroll-into-view; scroll-with-animation; enable-back-to-top; enable-flex; scroll-anchoring; bindscrolltoupper; bindscrolltolower; bindscroll; 
 
+示例：
 
+```javascript
+# js
+Page({
+  data: {
+    toView: 'yellow',
+    scrollLeft: 0,
+    //滚动的数组
+    scrolls: [
+      {
+        name: '黄色',
+        tag: 'yellow',
+      },
+      {
+        name: '绿色',
+        tag: 'green',
+      },
+      {
+        name: '红色',
+        tag: 'red',
+      },
+      {
+        name: '黄色',
+        tag: 'yellow',
+      },
+      {
+        name: '绿色',
+        tag: 'green',
+      },
+      {
+        name: '红色',
+        tag: 'red',
+      },
+    ],
+
+  },
+  scrollToRed: function (e) {
+    this.setData({
+      toView: 'green'
+    })
+  },
+  scrollTo100: function (e) {
+    this.setData({
+      scrollLeft: 100
+    })
+  },
+
+  upper: function (e) {
+    console.log('滚动到顶部')
+  },
+  lower: function (e) {
+    console.log('滚动到底部')
+  },
+  scroll: function (e) {
+    console.log(e)
+  },
+})
+```
+
+```wxml
+# wxml
+<view>scroll-view 横向</view>
+
+<button class='button' type='primary' size='mini' bindtap='scrollToRed'>点我滚动到绿色</button>
+
+<button class='button' type='primary' size='mini' bindtap='scrollTo100'>点我滚动100rpx距离</button>
+
+<scroll-view scroll-x="true" bindscrolltoupper="upper" bindscrolltolower="lower" bindscroll="scroll" scroll-into-view="{{toView}}" scroll-left="{{scrollTop}}">
+  <view class="scroll-x">
+    <view wx:for-items="{{scrolls}}" wx:key="name">
+      <view id="{{item.tag}}" class="{{item.tag}}">{{item.name}}</view>
+    </view>
+  </view>
+</scroll-view>
+
+<view>scroll-view 纵向</view>
+
+<scroll-view scroll-y="true" style="height: 500rpx;">
+  <view class="scroll-y" >
+    <view wx:for-items="{{scrolls}}" wx:key="name">
+      <view class="{{item.tag}}">{{item.name}}</view>
+    </view>
+  </view>
+</scroll-view>
+```
+
+```wxss
+# wxss
+.button
+{
+  margin: 20rpx;
+}
+.scroll-x {
+  display: flex;
+  flex-direction: row; 
+}
+.scroll-y {
+  display: flex;
+  flex-direction: column; 
+}
+.green
+{
+  display: flex;
+  align-items: center;
+  width: 400rpx;
+  height: 400rpx;
+  background: green;
+}
+.red
+{
+  display: flex;
+  align-items: center;
+  width: 400rpx;
+  height: 400rpx;
+  background: red;
+}
+.yellow
+{
+  display: flex;
+  align-items: center;
+  width: 400rpx;
+  height: 400rpx;
+  background: yellow;
+}
+```
 
 1.3 <swiper>: # need to improve
 
@@ -453,8 +580,6 @@ Page({
   },
 })
 ```
-
-
 
 ### 2.基础内容：
 
@@ -532,6 +657,43 @@ label属性：for (type:"string", string为控件的id)
 
 可使用for属性找到控件的id，或将控件放在该标签下
 
+示例：
+
+```js
+Page({
+  data: {
+    iconSize: [20, 30, 40, 50, 60, 70],
+    iconColor: [
+      'red', 'orange', 'yellow', 'green', 'rgb(0,255,255)', 'blue', 'purple'
+    ],
+    iconType: [
+      'success', 'success_no_circle', 'info', 'warn', 'waiting', 'cancel', 'download', 'search', 'clear'
+    ]
+  }
+})
+```
+
+```wxml
+<view class="group">
+  <block wx:for="{{iconSize}}">
+    <icon type="success" size="{{item}}"/>
+  </block>
+</view>
+
+<view class="group">
+  <block wx:for="{{iconType}}">
+    <icon type="{{item}}" size="40"/>
+  </block>
+</view>
+
+
+<view class="group">
+  <block wx:for="{{iconColor}}">
+    <icon type="success" size="40" color="{{item}}"/>
+  </block>
+</view>
+```
+
 #### 3.5 <slider>
 
 
@@ -592,6 +754,10 @@ mode的合法值：selector, multiSelector, time, date, region
 
 6.1 <map>
 
+```wxml
+<map id="map" longitude="113.324520" latitude="23.099994" scale="14" controls="{{controls}}" bindcontroltap="controltap" markers="{{markers}}" bindmarkertap="markertap" polyline="{{polyline}}" bindregionchange="regionchange" show-location style="width: 100%; height: 300px;"></map>
+```
+
 
 
 ### 7.导航：
@@ -606,7 +772,70 @@ mode的合法值：selector, multiSelector, time, date, region
 
 
 
+### App全局变量：
 
+页面通过，获得唯一的app函数
+
+```javascript
+const app = getApp()
+```
+
+全局变量引用：app.globalData
+
+
+
+### Page全局变量：
+
+改变或添加data内的变量：
+
+```javascript
+this.setData({ ... })
+```
+
+引用变量：
+
+```javascript
+this.data.vairable
+```
+
+
+
+### 函数的局部变量：
+
+需要在函数内先申明，如:
+
+```javascript
+var variableName = this.data.variableName 
+//调用this page的data
+```
+
+再引用
+
+
+
+### 云函数的变量：
+
+通过event传递，示例：
+
+```javascript
+//sum.js
+let {a,b,c} = event
+```
+
+```
+wx.cloud.callFunction({
+      // 需调用的云函数名
+      name: 'sum',
+      // 传给云函数的参数
+      data: {
+        a: 12,
+        b: 19,
+        c: 26,
+      },
+      // 成功回调
+      complete: console.log
+    })
+```
 
 
 
@@ -614,7 +843,7 @@ mode的合法值：selector, multiSelector, time, date, region
 
 格式：
 
-```
+```wxml
 # fileName.wxml
 <element>{{variableName}}</element>
 ```
@@ -628,6 +857,8 @@ Page({
     ...
 })
 ```
+
+
 
 ### 动态列表渲染：
 
@@ -1241,6 +1472,52 @@ wx.cloud.deleteFile({
 
 ### 登录：
 
+#### 方式1. 云函数login上传，之后调用如下示例：
+
+```javascript
+wx.cloud.callFunction({
+      name: 'login',
+      data: {},
+      success: res => {
+        console.log('[云函数] [login] user openid: ', res.result.openid)
+        app.globalData.openid = res.result.openid
+      },
+      fail: err => {
+        console.error('[云函数] [login] 调用失败', err)
+      }
+    })
+```
+
+#### 方式2. 
+
+#### 1. 使用wx.login（）函数获取code：
+
+```js
+wx.login({
+  success (res) {
+    if (res.code) {
+      //发起网络请求
+      wx.request({
+        url: 'https://...',
+        data: {
+          code: res.code
+        }
+      })
+    } else {
+      console.log('登录失败！' + res.errMsg)
+    }
+  }
+})
+```
+
+#### 2. 调用auth.code2Session接口, 获取session_key和openid
+
+请求地址：
+
+```url
+GET https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code
+```
+
 
 
 
@@ -1256,6 +1533,8 @@ wx.cloud.deleteFile({
 ### 支付：
 
 wx.requestPayment(Object object)
+
+
 
 
 
@@ -1564,33 +1843,3 @@ exports.main = async (event, context) => {
   }
 }
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-x
