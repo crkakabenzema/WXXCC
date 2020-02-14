@@ -507,6 +507,10 @@ Page({
 
 ```wxss
 # wxss
+box常用的特性: border: box border, margin: margin between boxes, padding: padding between box and item
+border常用的属性： style:（solid,dotted,dashed）,  width:(thin,medium,thick), color
+layout常用的模型： flow, float(left,right), layer
+position常用的形式： absolute(left,right,top,bottom), relative, fixed
 .button
 {
   margin: 20rpx;
