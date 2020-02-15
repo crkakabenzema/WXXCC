@@ -1581,7 +1581,8 @@ db.collection(collectionName).where({
 ```javascript
 db.collection(collectionName).add({
     data:{
-      ... 
+      description: "learn cloud database",
+      due: new Date("2018-09-01")
     },
     success: function(res){
         ...
