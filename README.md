@@ -57,11 +57,13 @@ Page({
 ```
 
 Page()模板：
-
+this代表Object page
+getApp()返回唯一的app对象
 ```javascript
 #### 
    define local variable area
 ####
+var app = getApp()
 
 Page({
     data: {
@@ -74,7 +76,8 @@ Page({
     },
     onLoad: function(options){
         //页面创建时执行
-        console.log(this.route)
+        var that = this
+        console.log(that.route)
         //函数内this.route返回页面路径
     }，
     onShow: function(){
