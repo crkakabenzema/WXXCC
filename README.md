@@ -32,6 +32,17 @@ const appInstance = getApp()
 console.log(appInstance.globalData)
 ```
 
+配置app的window
+"window":
+{
+  "navigationBarBackgroundColor": "#ffffff",
+  "navigationBarTextStyle": "black",
+  "navigationBarTitleText": "微信接口功能演示",
+  "backgroundColor": "#eeeeee",
+  "backgroundTextStyle": "light"
+}
+
+
 ## 2.Page()构造器注册页面:  
 
 函数内有两个默认变量，this和e, this指向page, e为event
