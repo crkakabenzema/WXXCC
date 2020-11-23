@@ -1586,6 +1586,8 @@ db.collection(collectionName).where({
 }).get({
     success: function(res){
         console.log(res)
+    },
+    fail:function(){
     }
 })
 ```
