@@ -1846,3 +1846,74 @@ exports.main = async (event, context) => {
   }
 }
 ```
+Example:
+信息流评论
+集合定义
+
+user: 用户信息集合，以用户 openid 为 id
+
+{
+  _id: string, // openid
+  _openid: string,
+  name: string,
+  isManager: boolean, // 管理员标记位
+}
+
+article: 文章集合
+
+{
+  _id: string,
+  publisher: string, // 发布者 openid
+  content: string, // 内容
+}
+
+comment: 评论集合
+
+{
+  _id: string,
+  commenter: string, // 评论者 openid
+  articleId: string, // 被评论的文章 id
+  content: string, // 评论内容
+}
+
+安全规则
+
+article 安全规则
+
+{
+  "read": true, // 公有读
+  "create": "doc.publisher == auth.openid", // 都可以发文章，但对数据一致性校验，要求 publisher 为发布者 openid
+  "update": "doc.publisher == auth.openid || get('database.user.${auth.openid}').isManager", // 仅发布者或管理员可以更新
+  "delete": "doc.publisher == auth.openid || get('database.user.${auth.openid}').isManager", // 仅发布者或管理员可以删除
+}
+
+comment 安全规则
+
+{
+  "read": true, // 公有读
+  "create": "doc.commenter == auth.openid", // 都可以发评论，但对数据一致性校验，要求 publisher 为发布者 openid
+  "update": "doc.commenter == auth.openid || get('database.user.${auth.openid}').isManager", // 仅发布者或管理员可以更新
+  "delete": "doc.commenter == auth.openid || get('database.user.${auth.openid}').isManager", // 仅发布者或管理员可以删除
+}
+
+查询示例
+
+创建一条评论：
+
+wx.cloud.init({
+  env: '环境 ID',
+})
+const db = wx.cloud.database()
+const _ = db.command
+
+const result = await db.collection('comment').add({
+  data: {
+    commenter: '{openid}', // 用 {openid} 变量，后台会自动替换为当前用户 openid
+    articleId: '文章 ID',
+    content: '评论内容',
+  },
+})
+
+console.log('创建结果', result)
+
+
