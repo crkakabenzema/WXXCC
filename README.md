@@ -1739,7 +1739,7 @@ db.collection(collectionName).doc(recordId).update({
 })
 ```
 
-set: 替换跟新一个记录,将data.''的字段更新为新值
+set: 替换跟新一个记录,用传入的对象替换指定的记录
 
 ```
 db.collection(collectionName).doc(recordId).set({
