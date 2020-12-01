@@ -1726,30 +1726,30 @@ db.collection('todos').where(_.or([
 
 #### 更新数据：
 
-update: 局部更新一个或多个记录
+update: 局部更新一个或多个记录，将原data更新为新data
 
 ```javascript
-db.collection(collectionName).doc(recordId).update(
+db.collection(collectionName).doc(recordId).update({
     data:{
        ...
     },
     success: function(res){
         // res.data
     }
-)
+})
 ```
 
-set: 替换跟新一个记录
+set: 替换跟新一个记录,将data.''的字段更新为新值
 
 ```
-db.collection(collectionName).doc(recordId).set(
+db.collection(collectionName).doc(recordId).set({
     data:{
        ...
     },
     success: function(res){
         // res.data
     }
-)
+})
 ```
 
 #### 更新数组中所有匹配的元素：
